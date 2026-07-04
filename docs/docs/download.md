@@ -3,7 +3,7 @@ id: download
 title: Download
 ---
 
-Gofast is distributed as a Go module.
+Gofast is installed through Go modules.
 
 ```bash
 go get github.com/EzekielRiv1/gofast
@@ -11,17 +11,19 @@ go get github.com/EzekielRiv1/gofast
 
 That command downloads the framework into your Go module and records the version in your `go.mod`.
 
-## Example app
+## Run the example
 
 The repository includes a basic application you can run locally:
 
 ```bash
+git clone https://github.com/EzekielRiv1/gofast.git
+cd gofast
 cd examples/basic
 go run .
 ```
 
-Open `http://localhost:8080` to try server-rendered navigation.
+Open `http://localhost:8080` to try route parameters, generated links, templates, and SPA-style internal navigation.
 
-## Source releases
+## Source code
 
-When tagged releases are published, download source archives from the project repository. Until then, use `go get` from your application module or clone the repository to explore the example and documentation.
+The source code is available at [github.com/EzekielRiv1/gofast](https://github.com/EzekielRiv1/gofast).

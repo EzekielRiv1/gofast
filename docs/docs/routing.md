@@ -3,7 +3,9 @@ id: routing
 title: Routing
 ---
 
-Gofast routes are explicit Go handlers.
+Gofast routes are explicit Go handlers. A route matches a URL path, runs a handler, and returns a `Page`.
+
+## Basic route
 
 ```go
 app.Get("/account", func(ctx *gofast.Context) gofast.Page {
@@ -67,6 +69,8 @@ tab := ctx.Query("tab")
 
 Query values are not part of route matching. They are extra request data available to your handler.
 
+## Not found pages
+
 Customize the not found page with `NotFound`:
 
 ```go
@@ -78,3 +82,9 @@ app.NotFound(func(*gofast.Context) gofast.Page {
 	}
 })
 ```
+
+## Common mistakes
+
+- Do not display route params in trusted HTML without escaping them.
+- Do not hardcode paths after naming a route; use `URL` or `MustURL` so links change with the route.
+- Do not put query string values in the route pattern. Read them with `ctx.Query`.

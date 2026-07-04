@@ -4,30 +4,11 @@ title: Gofast
 slug: /
 ---
 
-Gofast helps you build Go applications that render on the server and still feel quick in the browser.
+Gofast is a small Go framework for building server-rendered applications that navigate like single-page apps.
 
-Routes, layouts, rendering, and application structure stay in Go. The browser gets a small navigation layer that intercepts same-origin links, fetches the next rendered fragment, and updates the page without a full reload.
+Use it when you want Go to own routing, rendering, and application structure, while the browser handles fast same-origin navigation.
 
-Use it when you want SPA-style navigation without moving your application model into a JavaScript framework.
-
-## Why Gofast?
-
-| You want | Gofast gives you |
-| --- | --- |
-| Go-first application code | Routes, URL generation, and page rendering written in Go |
-| Understandable HTML | Handlers return HTML close to what the browser receives |
-| Faster internal navigation | Same-origin links update the page body without a full reload |
-| Less frontend build weight | JavaScript stays focused on browser coordination |
-
-## Install it
-
-```bash
-go get github.com/EzekielRiv1/gofast
-```
-
-Gofast is a normal Go module. You do not need Node.js to run a Gofast app. Node.js is only used for the documentation site and optional tooling.
-
-## Create your first page
+## First example
 
 ```go
 package main
@@ -37,54 +18,56 @@ import "github.com/EzekielRiv1/gofast"
 func main() {
 	app := gofast.New()
 
-app.Get("/", func(*gofast.Context) gofast.Page {
-		return gofast.Page{
-			Title: "Home",
-			Body:  gofast.HTML("<h1>Hello from Go</h1>"),
-		}
-})
+	app.Get("/", func(ctx *gofast.Context) gofast.Page {
+		return ctx.HTMLPage("Home", gofast.HTML("<h1>Hello from Go</h1>"))
+	})
 
 	_ = app.ListenAndServe(":8080")
 }
 ```
 
-Open `http://localhost:8080`. The page is server-rendered HTML, served by a regular Go HTTP server.
+Run the app and open `http://localhost:8080`.
+
+## Why Gofast?
+
+| You want | Gofast gives you |
+| --- | --- |
+| A Go-first app model | Route handlers, URL generation, and rendering in Go |
+| Server-rendered pages | Normal HTTP routes that still work without JavaScript |
+| SPA-style link clicks | Internal links can update the page without a full reload |
+| Reusable page templates | Go `html/template` rendering through `Views` |
 
 ## How it works
 
 1. A browser requests a route.
-2. Your Go handler returns a `gofast.Page`.
-3. Gofast resolves route parameters and renders the full document for normal page loads.
+2. Gofast matches the route and resolves any path parameters.
+3. Your handler returns a `gofast.Page`.
 4. For internal navigation, the browser asks for only the next page body.
-5. The small browser layer swaps that body into `#gofast-app` and updates the title.
+5. Gofast returns a fragment, and the browser swaps it into `#gofast-app`.
 
 ```mermaid
 flowchart LR
-  A["User clicks an internal link"] --> B["Browser sends X-Gofast-Navigate"]
-  B --> C["Go route renders the next Page"]
-  C --> D["Server returns the body fragment"]
-  D --> E["Browser updates #gofast-app"]
+  A["URL"] --> B["Route match"]
+  B --> C["Go handler"]
+  C --> D["Page template"]
+  D --> E["Full document or fragment"]
 ```
 
 ## When to use it
 
-Gofast is a good fit when your team wants:
+Gofast is a good fit when you want:
 
-- Go handlers to remain the center of the application.
-- Server-rendered pages that work with or without JavaScript.
-- SPA-like transitions for normal links.
-- A small framework surface that is easy to inspect.
+- a Go server as the center of the app;
+- explicit routes instead of file-system routing;
+- server-rendered HTML with quick internal navigation;
+- templates and helpers that stay close to Go's standard library.
 
-It may not be the right fit when your application depends on heavy client-side state, offline-first behavior, or a complex browser-only interface.
+Choose another approach when the main challenge is offline-first behavior, a large client-side state machine, or a complex browser-only interface.
 
-## Avoid this mistake
-
-Do not treat Gofast like a frontend framework with a Go backend attached. Keep domain logic, routing, authorization, data loading, and rendering decisions in Go. Use JavaScript only when the browser needs to coordinate navigation or interaction.
-
-## Next steps
+## Start here
 
 - [Install Gofast](installation)
-- [Download and run the example](download)
-- [Create an app](create-an-app)
+- [Create your first app](create-an-app)
 - [Learn routing](routing)
-- [Understand the browser layer](browser-layer)
+- [Render templates](rendering)
+- [Understand browser navigation](browser-layer)

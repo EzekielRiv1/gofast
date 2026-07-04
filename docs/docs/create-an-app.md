@@ -1,9 +1,11 @@
 ---
 id: create-an-app
-title: Create an App
+title: Create Your First App
 ---
 
-A minimal app creates a `gofast.App`, registers routes, and starts the HTTP server.
+This page builds a small Gofast app with one route, one route parameter, one generated URL, and one template.
+
+## 1. Create the app
 
 ```go
 package main
@@ -23,7 +25,7 @@ func main() {
 
 Run it and open `http://localhost:8080`.
 
-## Add a route parameter
+## 2. Add a route parameter
 
 ```go
 app.Get("/projects/:projectID", func(ctx *gofast.Context) gofast.Page {
@@ -37,7 +39,7 @@ Open `http://localhost:8080/projects/gofast`.
 
 This snippet uses `html.EscapeString` from Go's standard library before placing the route value into trusted HTML.
 
-## Generate a URL
+## 3. Generate a URL
 
 ```go
 href := app.MustURL("project.show", gofast.Params{
@@ -47,7 +49,7 @@ href := app.MustURL("project.show", gofast.Params{
 
 Use named routes for links instead of repeating path strings throughout your app.
 
-## Render a template
+## 4. Render a template
 
 ```go
 app := gofast.New().WithViews(gofast.MustViews("views/*.html"))
@@ -65,4 +67,11 @@ app.Get("/", func(ctx *gofast.Context) gofast.Page {
 {{ end }}
 ```
 
-For a complete example, see `examples/basic`.
+## What you learned
+
+- `app.Get` registers a route.
+- `:projectID` captures one URL segment.
+- `.Name` lets Gofast generate URLs for that route.
+- `ctx.Render` renders a named Go template into a page.
+
+For a complete working version, see `examples/basic`.

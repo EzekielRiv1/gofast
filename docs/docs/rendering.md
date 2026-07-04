@@ -3,7 +3,7 @@ id: rendering
 title: Rendering
 ---
 
-Handlers return a `gofast.Page`.
+Handlers return a `gofast.Page`. A page has a title, body, and optional HTTP status.
 
 ```go
 return ctx.HTMLPage("Dashboard", gofast.HTML("<h1>Dashboard</h1>"))
@@ -35,6 +35,18 @@ Define the template in `views/pages.html`:
 
 `ctx.Render` returns a `Page`. If the app has no view registry or the template fails to render, Gofast returns a `500` page instead of panicking during the request.
 
+## Status codes
+
+Set `Page.Status` when the response should use a specific HTTP status.
+
+```go
+return gofast.Page{
+	Title:  "Created",
+	Body:   gofast.HTML("<h1>Created</h1>"),
+	Status: 201,
+}
+```
+
 ## Custom layouts
 
 Use `WithLayout` when you want your own document shell:
@@ -59,3 +71,9 @@ The layout receives the current `Page` as template data. Keep `main#gofast-app` 
 ## When to use raw HTML
 
 Use `gofast.HTML` for small trusted fragments, examples, or output that has already been escaped. For normal pages, prefer `html/template` through `Views` so dynamic data is escaped by default.
+
+## Common mistakes
+
+- Do not pass unescaped user input to `gofast.HTML`.
+- Keep `main id="gofast-app"` in custom layouts if you want browser navigation to update in place.
+- Define templates with `{{ define "name" }}` when you plan to render them by name.

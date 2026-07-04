@@ -8,6 +8,7 @@ module.exports = {
     "rendering",
     "browser-layer",
     "common-features",
+    "api-reference",
     "debugging",
     "migration",
   ],
