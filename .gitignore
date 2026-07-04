@@ -1,0 +1,7 @@
+.cache/
+bin/
+dist/
+build/
+node_modules/
+.docusaurus/
+.DS_Store
