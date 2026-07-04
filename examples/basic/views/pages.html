@@ -1,0 +1,12 @@
+{{ define "pages/basic" }}
+<nav>
+  <a href="{{ .HomeURL }}">Home</a>
+  <a href="{{ .CounterURL }}">Counter</a>
+  <a href="{{ .ProjectURL }}">Project</a>
+</nav>
+<section>
+  <h1>{{ .Title }}</h1>
+  <p>{{ .Text }}</p>
+  <p><a href="{{ .CounterURL }}">Refresh the counter page</a></p>
+</section>
+{{ end }}

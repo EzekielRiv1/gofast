@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"log"
 	"time"
 
@@ -10,36 +9,43 @@ import (
 )
 
 func main() {
-	app := gofast.New().WithLayout(gofast.MustLayout(layout))
+	app := gofast.New().
+		WithLayout(gofast.MustLayout(layout)).
+		WithViews(gofast.MustViews("views/*.html"))
 
-	app.Get("/", func(*gofast.Context) gofast.Page {
-		return gofast.Page{
-			Title: "Gofast demo",
-			Body:  page("Home", "This page was rendered in Go. Try moving around without a full reload."),
-		}
-	})
+	app.Get("/", func(ctx *gofast.Context) gofast.Page {
+		return ctx.Render("Gofast demo", "pages/basic", map[string]string{
+			"Title":      "Home",
+			"Text":       "This page was rendered from a Go template. Try moving around without a full reload.",
+			"HomeURL":    ctx.MustURL("home", nil),
+			"CounterURL": ctx.MustURL("counter.show", gofast.Params{"name": "clock"}),
+			"ProjectURL": ctx.MustURL("project.show", gofast.Params{"projectID": "gofast"}),
+		})
+	}).Name("home")
 
-	app.Get("/counter", func(*gofast.Context) gofast.Page {
-		return gofast.Page{
-			Title: "Counter",
-			Body:  page("Counter", fmt.Sprintf("Server time: %s", time.Now().Format(time.Kitchen))),
-		}
-	})
+	app.Get("/counter/:name", func(ctx *gofast.Context) gofast.Page {
+		return ctx.Render("Counter", "pages/basic", map[string]string{
+			"Title":      "Counter: " + ctx.Param("name"),
+			"Text":       fmt.Sprintf("Server time: %s", time.Now().Format(time.Kitchen)),
+			"HomeURL":    ctx.MustURL("home", nil),
+			"CounterURL": ctx.MustURL("counter.show", gofast.Params{"name": ctx.Param("name")}),
+			"ProjectURL": ctx.MustURL("project.show", gofast.Params{"projectID": "gofast"}),
+		})
+	}).Name("counter.show")
+
+	app.Get("/projects/:projectID", func(ctx *gofast.Context) gofast.Page {
+		projectID := ctx.Param("projectID")
+		return ctx.Render("Project", "pages/basic", map[string]string{
+			"Title":      "Project: " + projectID,
+			"Text":       "The project ID came from the URL route parameter.",
+			"HomeURL":    ctx.MustURL("home", nil),
+			"CounterURL": ctx.MustURL("counter.show", gofast.Params{"name": "clock"}),
+			"ProjectURL": ctx.MustURL("project.show", gofast.Params{"projectID": projectID}),
+		})
+	}).Name("project.show")
 
 	log.Println("listening on http://localhost:8080")
 	log.Fatal(app.ListenAndServe(":8080"))
-}
-
-func page(title, text string) template.HTML {
-	return gofast.HTML(fmt.Sprintf(`<nav>
-  <a href="/">Home</a>
-  <a href="/counter">Counter</a>
-</nav>
-<section>
-  <h1>%s</h1>
-  <p>%s</p>
-  <p><a href="/counter">Refresh the counter page</a></p>
-</section>`, template.HTMLEscapeString(title), template.HTMLEscapeString(text)))
 }
 
 var layout = `<!doctype html>

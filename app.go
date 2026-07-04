@@ -2,6 +2,7 @@ package gofast
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 	"net/http"
 	"strings"
@@ -16,6 +17,8 @@ type Handler func(*Context) Page
 type Context struct {
 	Response http.ResponseWriter
 	Request  *http.Request
+	app      *App
+	params   Params
 }
 
 // Page is the rendered result for a route.
@@ -27,15 +30,17 @@ type Page struct {
 
 // App is a small Go-first application router and renderer.
 type App struct {
-	routes   map[string]Handler
+	routes   []*Route
+	named    map[string]*Route
 	layout   Layout
+	views    *Views
 	notFound Handler
 }
 
 // New creates an application with the default document layout.
 func New() *App {
 	app := &App{
-		routes: make(map[string]Handler),
+		named:  make(map[string]*Route),
 		layout: DefaultLayout(),
 	}
 	app.notFound = func(*Context) Page {
@@ -54,22 +59,30 @@ func (a *App) WithLayout(layout Layout) *App {
 	return a
 }
 
+// WithViews sets the template registry used by Context.Render.
+func (a *App) WithViews(views *Views) *App {
+	a.views = views
+	return a
+}
+
 // NotFound replaces the default 404 page.
 func (a *App) NotFound(handler Handler) {
 	a.notFound = handler
 }
 
-// Route registers an exact path handler.
-func (a *App) Route(path string, handler Handler) {
+// Route registers a path handler. Paths may include named parameters, such as /projects/:id.
+func (a *App) Route(path string, handler Handler) *Route {
 	if path == "" || !strings.HasPrefix(path, "/") {
 		panic("gofast: route path must begin with /")
 	}
-	a.routes[path] = handler
+	route := newRoute(a, path, handler)
+	a.routes = append(a.routes, route)
+	return route
 }
 
-// Get registers an exact GET route.
-func (a *App) Get(path string, handler Handler) {
-	a.Route(path, func(ctx *Context) Page {
+// Get registers a GET route. Paths may include named parameters, such as /projects/:id.
+func (a *App) Get(path string, handler Handler) *Route {
+	return a.Route(path, func(ctx *Context) Page {
 		if ctx.Request.Method != http.MethodGet {
 			ctx.Response.Header().Set("Allow", http.MethodGet)
 			return Page{
@@ -82,13 +95,34 @@ func (a *App) Get(path string, handler Handler) {
 	})
 }
 
+// URL builds a path for a named route.
+func (a *App) URL(name string, params Params) (string, error) {
+	route, ok := a.named[name]
+	if !ok {
+		return "", fmt.Errorf("gofast: route %q is not registered", name)
+	}
+	return route.URL(params)
+}
+
+// MustURL builds a path for a named route or panics.
+func (a *App) MustURL(name string, params Params) string {
+	path, err := a.URL(name, params)
+	if err != nil {
+		panic(err)
+	}
+	return path
+}
+
 // ServeHTTP implements http.Handler.
 func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	handler, ok := a.routes[r.URL.Path]
-	if !ok {
-		handler = a.notFound
+	for _, route := range a.routes {
+		params, ok := route.match(r.URL.Path)
+		if ok {
+			a.render(w, r, route.handler, params)
+			return
+		}
 	}
-	a.render(w, r, handler)
+	a.render(w, r, a.notFound, nil)
 }
 
 // ListenAndServe starts an HTTP server for the application.
@@ -106,8 +140,59 @@ func (c *Context) RequestContext() context.Context {
 	return c.Request.Context()
 }
 
-func (a *App) render(w http.ResponseWriter, r *http.Request, handler Handler) {
-	page := handler(&Context{Response: w, Request: r})
+// Param returns a matched route parameter by name.
+func (c *Context) Param(name string) string {
+	return c.params.Get(name)
+}
+
+// Params returns a copy of all matched route parameters.
+func (c *Context) Params() Params {
+	return c.params.Clone()
+}
+
+// Query returns the first query string value for name.
+func (c *Context) Query(name string) string {
+	return c.Request.URL.Query().Get(name)
+}
+
+// URL builds a path for a named route.
+func (c *Context) URL(name string, params Params) (string, error) {
+	return c.app.URL(name, params)
+}
+
+// MustURL builds a path for a named route or panics.
+func (c *Context) MustURL(name string, params Params) string {
+	return c.app.MustURL(name, params)
+}
+
+// HTMLPage returns a Page from a trusted HTML fragment.
+func (c *Context) HTMLPage(title string, body template.HTML) Page {
+	return Page{Title: title, Body: body}
+}
+
+// Render renders a named template from the app's Views registry.
+func (c *Context) Render(title, templateName string, data any) Page {
+	if c.app.views == nil {
+		return Page{
+			Title:  "Template error",
+			Body:   HTML("<h1>Template error</h1><p>No template registry is configured.</p>"),
+			Status: http.StatusInternalServerError,
+		}
+	}
+
+	body, err := c.app.views.Render(templateName, data)
+	if err != nil {
+		return Page{
+			Title:  "Template error",
+			Body:   HTML("<h1>Template error</h1><p>The page template could not be rendered.</p>"),
+			Status: http.StatusInternalServerError,
+		}
+	}
+	return Page{Title: title, Body: body}
+}
+
+func (a *App) render(w http.ResponseWriter, r *http.Request, handler Handler, params Params) {
+	page := handler(&Context{Response: w, Request: r, app: a, params: params})
 	if page.Status == 0 {
 		page.Status = http.StatusOK
 	}

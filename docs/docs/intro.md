@@ -14,7 +14,7 @@ Use it when you want SPA-style navigation without moving your application model 
 
 | You want | Gofast gives you |
 | --- | --- |
-| Go-first application code | Routes and page rendering written in Go |
+| Go-first application code | Routes, URL generation, and page rendering written in Go |
 | Understandable HTML | Handlers return HTML close to what the browser receives |
 | Faster internal navigation | Same-origin links update the page body without a full reload |
 | Less frontend build weight | JavaScript stays focused on browser coordination |
@@ -37,12 +37,12 @@ import "github.com/EzekielRiv1/gofast"
 func main() {
 	app := gofast.New()
 
-	app.Get("/", func(*gofast.Context) gofast.Page {
+app.Get("/", func(*gofast.Context) gofast.Page {
 		return gofast.Page{
 			Title: "Home",
 			Body:  gofast.HTML("<h1>Hello from Go</h1>"),
 		}
-	})
+})
 
 	_ = app.ListenAndServe(":8080")
 }
@@ -54,7 +54,7 @@ Open `http://localhost:8080`. The page is server-rendered HTML, served by a regu
 
 1. A browser requests a route.
 2. Your Go handler returns a `gofast.Page`.
-3. Gofast renders the full document for normal page loads.
+3. Gofast resolves route parameters and renders the full document for normal page loads.
 4. For internal navigation, the browser asks for only the next page body.
 5. The small browser layer swaps that body into `#gofast-app` and updates the title.
 
