@@ -42,7 +42,7 @@ From inside your app folder:
 
 ```bash
 go mod init example.com/myapp
-go get github.com/EzekielRiv1/gofast
+go get github.com/ezekielriv1/gofast
 ```
 
 ## 2. Create `main.go`
@@ -54,7 +54,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/EzekielRiv1/gofast"
+	"github.com/ezekielriv1/gofast"
 )
 
 func main() {

@@ -1,3 +1,3 @@
-module github.com/EzekielRiv1/gofast
+module github.com/ezekielriv1/gofast
 
 go 1.26

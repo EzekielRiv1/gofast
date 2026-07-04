@@ -13,7 +13,7 @@ Use it when you want Go to own routing, rendering, and application structure, wh
 ```go
 package main
 
-import "github.com/EzekielRiv1/gofast"
+import "github.com/ezekielriv1/gofast"
 
 func main() {
 	app := gofast.New()

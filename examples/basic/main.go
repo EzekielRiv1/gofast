@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/EzekielRiv1/gofast"
+	"github.com/ezekielriv1/gofast"
 )
 
 func main() {

@@ -6,7 +6,7 @@ title: Installation
 Install Gofast in an existing Go module:
 
 ```bash
-go get github.com/EzekielRiv1/gofast
+go get github.com/ezekielriv1/gofast
 ```
 
 ## Requirements
@@ -21,7 +21,7 @@ Create a small `main.go`:
 ```go
 package main
 
-import "github.com/EzekielRiv1/gofast"
+import "github.com/ezekielriv1/gofast"
 
 func main() {
 	app := gofast.New()

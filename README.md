@@ -17,7 +17,7 @@ Go owns routing, rendering, layouts, and server behavior. The browser gets a tin
 ```go
 package main
 
-import "github.com/EzekielRiv1/gofast"
+import "github.com/ezekielriv1/gofast"
 
 func main() {
 	app := gofast.New()
