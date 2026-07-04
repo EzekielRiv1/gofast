@@ -6,7 +6,7 @@ title: Download
 Gofast is installed through Go modules.
 
 ```bash
-go get github.com/ezekielriv1/gofast
+go get github.com/ezekielriv1/gofast@v0.1.0
 ```
 
 That command downloads the framework into your Go module and records the version in your `go.mod`.

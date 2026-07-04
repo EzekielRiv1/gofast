@@ -42,7 +42,7 @@ From inside your app folder:
 
 ```bash
 go mod init example.com/myapp
-go get github.com/ezekielriv1/gofast
+go get github.com/ezekielriv1/gofast@v0.1.0
 ```
 
 ## 2. Create `main.go`

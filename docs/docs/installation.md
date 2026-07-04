@@ -6,7 +6,7 @@ title: Installation
 Install Gofast in an existing Go module:
 
 ```bash
-go get github.com/ezekielriv1/gofast
+go get github.com/ezekielriv1/gofast@v0.1.0
 ```
 
 ## Requirements

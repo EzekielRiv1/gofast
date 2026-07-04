@@ -14,6 +14,12 @@ Go owns routing, rendering, layouts, and server behavior. The browser gets a tin
 
 ## Quick start
 
+Install Gofast:
+
+```powershell
+go get github.com/ezekielriv1/gofast@v0.1.0
+```
+
 ```go
 package main
 
